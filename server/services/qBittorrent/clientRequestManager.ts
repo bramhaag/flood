@@ -66,6 +66,7 @@ class ClientRequestManager {
           username,
           password,
         }),
+	{headers: await this.getRequestHeaders(connectionSettings)},
       )
       .then((res) => {
         const cookies = res.headers['set-cookie'];
@@ -81,7 +82,7 @@ class ClientRequestManager {
   async updateAuthCookie(connectionSettings?: QBittorrentConnectionSettings): Promise<void> {
     let authFailed = false;
 
-    this.authCookie = this.authenticate(connectionSettings).catch(() => {
+    this.authCookie = this.authenticate(connectionSettings).catch((e) => {
       authFailed = true;
       return undefined;
     });
@@ -93,10 +94,10 @@ class ClientRequestManager {
     }
   }
 
-  async getRequestHeaders(): Promise<Record<string, string>> {
+  async getRequestHeaders(connectionSettings = this.connectionSettings): Promise<Record<string, string>> {
     const Cookie = await this.authCookie;
     return {
-      ...(Cookie == null ? {} : {Cookie}),
+      ...(Cookie == null ? {} : {Cookie}), "Referer": connectionSettings.url,
     };
   }
 
